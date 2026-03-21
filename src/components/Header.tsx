@@ -6,11 +6,9 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 
 const navLinks = [
-  { label: 'Dashboard', path: '/' },
-  { label: 'Reports', path: '/reports' },
-  { label: 'Cryptocurrency', path: '/cryptocurrency' },
-  { label: 'Exchange', path: '/exchange' },
-  { label: 'Community', path: '/community' },
+  { label: 'General Overview', path: '/' },
+  { label: 'Account Deep Dive', path: '/accounts' },
+  { label: 'Inventory Deep Dive', path: '/inventory' },
 ]
 
 export function Header() {
@@ -76,18 +74,18 @@ export function Header() {
       <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
         <div className="text-right hidden sm:block">
           <p className="text-sm font-semibold text-foreground leading-none">
-            Ilona Smliduet
+            Admin User
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            ilondut46@gmail.com
+            admin@sharepoint.com
           </p>
         </div>
         <Avatar className="h-10 w-10 border border-border">
           <AvatarImage
-            src="https://img.usecurling.com/ppl/medium?gender=female"
-            alt="Ilona Smliduet"
+            src="https://img.usecurling.com/ppl/medium?gender=male&seed=3"
+            alt="Admin User"
           />
-          <AvatarFallback>IS</AvatarFallback>
+          <AvatarFallback>AU</AvatarFallback>
         </Avatar>
       </div>
     </header>

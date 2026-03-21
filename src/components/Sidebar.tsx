@@ -1,23 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import {
-  LayoutDashboard,
-  BarChart3,
-  FileText,
-  RefreshCw,
-  Settings,
-  Sun,
-  Moon,
-} from 'lucide-react'
+import { LayoutDashboard, Wallet, Package, Sun, Moon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: BarChart3, label: 'Reports', path: '/reports' },
-  { icon: FileText, label: 'Cryptocurrency', path: '/cryptocurrency' },
-  { icon: RefreshCw, label: 'Exchange', path: '/exchange' },
-  { icon: Settings, label: 'Community', path: '/community' },
+  { icon: LayoutDashboard, label: 'General Overview', path: '/' },
+  { icon: Wallet, label: 'Account Deep Dive', path: '/accounts' },
+  { icon: Package, label: 'Inventory Deep Dive', path: '/inventory' },
 ]
 
 export function Sidebar() {
@@ -32,9 +22,9 @@ export function Sidebar() {
       <div className="mb-10">
         <Link
           to="/"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-card text-foreground font-bold text-xl shadow-sm hover:scale-105 transition-transform"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-xl shadow-sm hover:scale-105 transition-transform"
         >
-          P
+          SP
         </Link>
       </div>
 
