@@ -7,12 +7,14 @@ import {
   Sun,
   Moon,
   Settings,
+  LineChart,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Visão Geral', path: '/' },
+  { icon: LineChart, label: 'Fluxo de Caixa', path: '/cash-flow' },
   { icon: Wallet, label: 'Contas', path: '/accounts' },
   { icon: Package, label: 'Estoque', path: '/inventory' },
   { icon: Settings, label: 'Configurações', path: '/settings' },

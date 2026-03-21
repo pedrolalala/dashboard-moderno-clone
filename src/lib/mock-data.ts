@@ -63,3 +63,25 @@ export const pieData = [
   { name: 'BERTOLLUCI', value: 3.23, fill: '#a8a29e' },
   { name: 'DIMLUX', value: 3.04, fill: '#0ea5e9' },
 ]
+
+export const cashFlowAccumulated = Array.from({ length: 32 }, (_, i) => ({
+  day: i,
+  value: 5.8,
+}))
+
+export const cashFlowDaily = Array.from({ length: 32 }, (_, i) => {
+  let rec = Math.random() * 2 + 0.5
+  let des = Math.random() * 1.5 + 0.2
+  if (i % 4 === 0) des += 1.5
+  if (i % 7 === 0) rec += 2.0
+  return {
+    day: i,
+    receita: Number(rec.toFixed(2)),
+    despesa: Number(des.toFixed(2)),
+  }
+})
+
+export const cashFlowPie = [
+  { name: 'Despesas', value: 36.51, percent: 0.5197, fill: '#b91c1c' },
+  { name: 'Receita', value: 33.75, percent: 0.4803, fill: '#1d4ed8' },
+]

@@ -7,6 +7,7 @@ import Layout from './components/Layout'
 import Index from './pages/Index'
 import Accounts from './pages/Accounts'
 import Inventory from './pages/Inventory'
+import CashFlow from './pages/CashFlow'
 import NotFound from './pages/NotFound'
 
 const App = () => (
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
+            <Route path="/cash-flow" element={<CashFlow />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/inventory" element={<Inventory />} />
           </Route>
