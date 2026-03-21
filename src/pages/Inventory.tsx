@@ -12,6 +12,9 @@ export default function Inventory() {
   if (loading) {
     return (
       <div className="space-y-6">
+        <p className="text-muted-foreground animate-pulse mb-4">
+          Carregando...
+        </p>
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Skeleton className="h-32 rounded-xl" />
@@ -36,11 +39,9 @@ export default function Inventory() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Inventory Deep Dive
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Estoque</h1>
         <p className="text-muted-foreground">
-          Comprehensive stock levels and category breakdowns.
+          Níveis abrangentes de estoque e detalhamento por categoria.
         </p>
       </div>
 
@@ -49,10 +50,10 @@ export default function Inventory() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">
-                Total Stock Items
+                Total de Itens
               </p>
               <h3 className="text-3xl font-bold text-foreground">
-                {totalItems.toLocaleString()}
+                {totalItems.toLocaleString('pt-BR')}
               </h3>
             </div>
             <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center">
@@ -65,7 +66,7 @@ export default function Inventory() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">
-                Low Stock Alerts
+                Alertas de Estoque
               </p>
               <h3 className="text-3xl font-bold text-foreground">
                 {lowStockCount}
@@ -81,7 +82,7 @@ export default function Inventory() {
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">
-                Out of Stock
+                Sem estoque
               </p>
               <h3 className="text-3xl font-bold text-foreground">
                 {outOfStockCount}

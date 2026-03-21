@@ -13,14 +13,16 @@ export interface InventoryData {
   id: string
   itemName: string
   sku: string
+  supplier: string
   category: string
   quantity: number
   unitPrice: number
 }
 
 export interface AccountHistoryData {
-  month: string
-  balance: number
+  date: string
+  entradas: number
+  saidas: number
 }
 
 export function useSharePointData() {
@@ -29,10 +31,10 @@ export function useSharePointData() {
   const accounts = useMemo<AccountData[]>(() => {
     return Array.from({ length: 45 }).map((_, i) => ({
       id: `ACC-${1000 + i}`,
-      name: `Corporate Account ${i + 1}`,
-      type: ['Checking', 'Savings', 'Investment', 'Credit'][i % 4],
+      name: `Conta Corporativa ${i + 1}`,
+      type: ['Corrente', 'Poupança', 'Investimento', 'Crédito'][i % 4],
       balance: 1000 + ((i * 2500) % 80000),
-      status: i % 7 === 0 ? 'Pending' : i % 11 === 0 ? 'Inactive' : 'Active',
+      status: i % 7 === 0 ? 'Pendente' : i % 11 === 0 ? 'Cancelado' : 'Pago',
       lastSync: new Date(Date.now() - i * 100000000)
         .toISOString()
         .split('T')[0],
@@ -44,31 +46,22 @@ export function useSharePointData() {
       id: `INV-${5000 + i}`,
       itemName: `Item ${i + 1} - ${['Pro', 'Max', 'Lite', 'Basic'][i % 4]}`,
       sku: `SKU-${10000 + i * 7}`,
-      category: ['Electronics', 'Furniture', 'Stationery', 'Software'][i % 4],
-      quantity: (i * 13) % 150,
+      supplier: `Fornecedor ${['A', 'B', 'C', 'D'][i % 4]}`,
+      category: ['Eletrônicos', 'Móveis', 'Papelaria', 'Software'][i % 4],
+      quantity: i % 15 === 0 ? 0 : (i * 13) % 150,
       unitPrice: 10 + ((i * 5) % 300),
     }))
   }, [])
 
   const accountHistory = useMemo<AccountHistoryData[]>(() => {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ]
-    return months.map((month, i) => ({
-      month,
-      balance: 400000 + i * 15000 + (i % 3 === 0 ? -5000 : 10000),
-    }))
+    return Array.from({ length: 12 }).map((_, i) => {
+      const d = new Date(2023, i, 15)
+      return {
+        date: d.toISOString().split('T')[0],
+        entradas: 200000 + i * 15000 + (i % 3 === 0 ? -5000 : 10000),
+        saidas: 150000 + i * 10000 + (i % 2 === 0 ? 5000 : -2000),
+      }
+    })
   }, [])
 
   useEffect(() => {

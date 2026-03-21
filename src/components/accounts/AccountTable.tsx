@@ -24,7 +24,7 @@ export function AccountTable({ data }: { data: AccountData[] }) {
     return data.filter(
       (d) =>
         d.name.toLowerCase().includes(search.toLowerCase()) ||
-        d.id.toLowerCase().includes(search.toLowerCase()),
+        d.type.toLowerCase().includes(search.toLowerCase()),
     )
   }, [data, search])
 
@@ -36,13 +36,20 @@ export function AccountTable({ data }: { data: AccountData[] }) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Active':
+      case 'Pago':
         return 'bg-green-500/10 text-green-600 border-green-500/20'
-      case 'Pending':
+      case 'Pendente':
         return 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+      case 'Cancelado':
+        return 'bg-destructive/10 text-destructive border-destructive/20'
       default:
         return 'bg-muted text-muted-foreground'
     }
+  }
+
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('-')
+    return `${day}/${month}/${year}`
   }
 
   if (data.length === 0) {
@@ -50,9 +57,9 @@ export function AccountTable({ data }: { data: AccountData[] }) {
       <Card className="shadow-sm border-border/40 p-10 text-center">
         <div className="flex flex-col items-center justify-center">
           <Search className="h-10 w-10 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold">No Accounts Found</h3>
+          <h3 className="text-lg font-semibold">Nenhuma conta encontrada</h3>
           <p className="text-sm text-muted-foreground">
-            There is no account data available from the integration.
+            Não há dados de conta disponíveis da integração.
           </p>
         </div>
       </Card>
@@ -62,11 +69,13 @@ export function AccountTable({ data }: { data: AccountData[] }) {
   return (
     <Card className="shadow-sm border-border/40">
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4">
-        <CardTitle className="text-lg font-semibold">Account Details</CardTitle>
+        <CardTitle className="text-lg font-semibold">
+          Detalhes da Conta
+        </CardTitle>
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search accounts..."
+            placeholder="Buscar..."
             className="pl-8"
             value={search}
             onChange={(e) => {
@@ -81,23 +90,27 @@ export function AccountTable({ data }: { data: AccountData[] }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Account ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Last Sync</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="font-medium">{row.id}</TableCell>
+                    <TableCell className="font-medium text-muted-foreground">
+                      {formatDate(row.lastSync)}
+                    </TableCell>
                     <TableCell>{row.name}</TableCell>
                     <TableCell>{row.type}</TableCell>
                     <TableCell className="text-right">
-                      ${row.balance.toLocaleString()}
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }).format(row.balance)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -107,15 +120,12 @@ export function AccountTable({ data }: { data: AccountData[] }) {
                         {row.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {row.lastSync}
-                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    No results found.
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    Nenhum dado encontrado.
                   </TableCell>
                 </TableRow>
               )}
@@ -131,10 +141,10 @@ export function AccountTable({ data }: { data: AccountData[] }) {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
-              Previous
+              Anterior
             </Button>
             <div className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
+              Página {page} de {totalPages}
             </div>
             <Button
               variant="outline"
@@ -142,7 +152,7 @@ export function AccountTable({ data }: { data: AccountData[] }) {
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
             >
-              Next
+              Próximo
             </Button>
           </div>
         )}

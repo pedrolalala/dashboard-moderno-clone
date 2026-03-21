@@ -6,9 +6,10 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 
 const navLinks = [
-  { label: 'General Overview', path: '/' },
-  { label: 'Account Deep Dive', path: '/accounts' },
-  { label: 'Inventory Deep Dive', path: '/inventory' },
+  { label: 'Visão Geral', path: '/' },
+  { label: 'Contas', path: '/accounts' },
+  { label: 'Estoque', path: '/inventory' },
+  { label: 'Configurações', path: '/settings' },
 ]
 
 export function Header() {

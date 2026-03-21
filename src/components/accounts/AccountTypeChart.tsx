@@ -12,7 +12,7 @@ const COLORS = [
 ]
 
 const chartConfig = {
-  value: { label: 'Accounts' },
+  value: { label: 'Contas' },
 }
 
 export function AccountTypeChart({ accounts }: { accounts: AccountData[] }) {
@@ -36,7 +36,7 @@ export function AccountTypeChart({ accounts }: { accounts: AccountData[] }) {
     return (
       <Card className="h-full">
         <CardContent className="flex h-[300px] items-center justify-center text-muted-foreground">
-          No data available
+          Nenhum dado disponível
         </CardContent>
       </Card>
     )
@@ -45,7 +45,9 @@ export function AccountTypeChart({ accounts }: { accounts: AccountData[] }) {
   return (
     <Card className="shadow-sm border-border/40 h-full flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">Account Types</CardTitle>
+        <CardTitle className="text-base font-semibold">
+          Tipos de Conta
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 min-h-[300px] flex items-center justify-center">
         <ChartContainer config={chartConfig} className="h-full w-full">

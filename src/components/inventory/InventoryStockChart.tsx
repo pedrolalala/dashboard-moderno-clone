@@ -5,7 +5,7 @@ import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 import { InventoryData } from '@/hooks/useSharePointData'
 
 const chartConfig = {
-  quantity: { label: 'Total Stock', color: 'hsl(var(--chart-2))' },
+  quantity: { label: 'Estoque Total', color: 'hsl(var(--chart-2))' },
 }
 
 export function InventoryStockChart({
@@ -32,7 +32,7 @@ export function InventoryStockChart({
     return (
       <Card className="h-full">
         <CardContent className="flex h-[300px] items-center justify-center text-muted-foreground">
-          No data available
+          Nenhum dado disponível
         </CardContent>
       </Card>
     )
@@ -42,7 +42,7 @@ export function InventoryStockChart({
     <Card className="shadow-sm border-border/40 h-full flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
-          Stock Levels by Category
+          Distribuição de Estoque
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 min-h-[300px]">

@@ -11,6 +11,9 @@ export default function Accounts() {
   if (loading) {
     return (
       <div className="space-y-6">
+        <p className="text-muted-foreground animate-pulse mb-4">
+          Carregando...
+        </p>
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Skeleton className="h-32 rounded-xl" />
@@ -29,9 +32,9 @@ export default function Accounts() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Account Deep Dive</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Contas</h1>
         <p className="text-muted-foreground">
-          Detailed financial data and metrics synchronized from SharePoint.
+          Dados financeiros detalhados e métricas sincronizadas do SharePoint.
         </p>
       </div>
 

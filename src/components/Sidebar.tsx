@@ -1,13 +1,21 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Wallet, Package, Sun, Moon } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Wallet,
+  Package,
+  Sun,
+  Moon,
+  Settings,
+} from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'General Overview', path: '/' },
-  { icon: Wallet, label: 'Account Deep Dive', path: '/accounts' },
-  { icon: Package, label: 'Inventory Deep Dive', path: '/inventory' },
+  { icon: LayoutDashboard, label: 'Visão Geral', path: '/' },
+  { icon: Wallet, label: 'Contas', path: '/accounts' },
+  { icon: Package, label: 'Estoque', path: '/inventory' },
+  { icon: Settings, label: 'Configurações', path: '/settings' },
 ]
 
 export function Sidebar() {
@@ -59,11 +67,11 @@ export function Sidebar() {
           size="icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="w-12 h-12 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          title="Toggle Theme"
+          title="Alternar Tema"
         >
           <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">Alternar tema</span>
         </Button>
       </div>
     </aside>

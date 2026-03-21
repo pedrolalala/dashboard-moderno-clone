@@ -12,6 +12,9 @@ export default function Index() {
   if (loading) {
     return (
       <div className="space-y-6">
+        <p className="text-muted-foreground animate-pulse mb-4">
+          Carregando...
+        </p>
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Skeleton className="h-32 rounded-xl" />
@@ -29,9 +32,9 @@ export default function Index() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">General Overview</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Visão Geral</h1>
         <p className="text-muted-foreground">
-          Consolidated view of Account and Inventory data from SharePoint.
+          Visão consolidada dos dados de Contas e Estoque do SharePoint.
         </p>
       </div>
 

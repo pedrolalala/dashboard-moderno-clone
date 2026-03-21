@@ -19,7 +19,7 @@ export function LowStockAlerts({ inventory }: { inventory: InventoryData[] }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-500" />
-          Low Stock Alerts
+          Alertas de Estoque
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1">
@@ -38,7 +38,7 @@ export function LowStockAlerts({ inventory }: { inventory: InventoryData[] }) {
                 </div>
                 <div className="text-right whitespace-nowrap">
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-destructive/10 text-destructive">
-                    {item.quantity} left
+                    {item.quantity} restantes
                   </span>
                 </div>
               </div>
@@ -46,7 +46,7 @@ export function LowStockAlerts({ inventory }: { inventory: InventoryData[] }) {
           </div>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            No items are low in stock.
+            Nenhum item com estoque baixo.
           </div>
         )}
       </CardContent>
