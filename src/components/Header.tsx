@@ -1,93 +1,32 @@
-import { Link, useLocation } from 'react-router-dom'
-import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Menu } from 'lucide-react'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-
-const navLinks = [
-  { label: 'Visão Geral', path: '/' },
-  { label: 'Contas', path: '/accounts' },
-  { label: 'Estoque', path: '/inventory' },
-  { label: 'Configurações', path: '/settings' },
-]
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 export function Header() {
-  const location = useLocation()
-
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b border-border/10 md:pl-24">
-      {/* Mobile Menu */}
-      <div className="md:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="w-[240px] bg-card border-r-border"
-          >
-            <nav className="flex flex-col gap-4 mt-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={cn(
-                    'text-lg font-medium transition-colors',
-                    location.pathname === link.path
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center gap-8">
-        {navLinks.map((link) => {
-          const isActive = location.pathname === link.path
-          return (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                'relative text-sm font-medium transition-colors hover:text-foreground py-2',
-                isActive ? 'text-foreground' : 'text-muted-foreground',
-              )}
-            >
-              {link.label}
-              {isActive && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
-              )}
-            </Link>
-          )
-        })}
-      </nav>
-
-      {/* User Profile */}
-      <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-        <div className="text-right hidden sm:block">
-          <p className="text-sm font-semibold text-foreground leading-none">
-            Admin User
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            admin@sharepoint.com
-          </p>
-        </div>
-        <Avatar className="h-10 w-10 border border-border">
-          <AvatarImage
-            src="https://img.usecurling.com/ppl/medium?gender=male&seed=3"
-            alt="Admin User"
-          />
-          <AvatarFallback>AU</AvatarFallback>
-        </Avatar>
+    <header className="flex flex-col md:flex-row items-center justify-between px-6 py-3 bg-[#252a31] border-b border-[#3b424d] shrink-0">
+      <h1 className="text-2xl font-bold text-white tracking-wide w-full md:w-auto mb-4 md:mb-0">
+        Lucenera
+      </h1>
+      <div className="flex flex-col items-start w-full md:w-auto">
+        <label className="text-[10px] font-bold text-white/70 uppercase tracking-wider mb-1">
+          Marca
+        </label>
+        <Select defaultValue="todos">
+          <SelectTrigger className="w-full md:w-[200px] h-8 bg-[#1e242b] border-[#3b424d] text-white text-sm focus:ring-0">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#2d333b] border-[#3b424d] text-white">
+            <SelectItem value="todos">Todos</SelectItem>
+            <SelectItem value="interlight">INTERLIGHT</SelectItem>
+            <SelectItem value="ubiqua">UBIQUA</SelectItem>
+            <SelectItem value="iluminar">ILUMINAR</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </header>
   )
