@@ -1,73 +1,122 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
-export interface AccountData {
+export interface Account {
   id: string
   name: string
   type: string
   balance: number
   status: string
-  lastSync: string
 }
 
-export interface InventoryData {
-  id: string
-  itemName: string
-  sku: string
-  supplier: string
-  category: string
-  quantity: number
-  unitPrice: number
-}
-
-export interface AccountHistoryData {
+export interface AccountHistory {
   date: string
-  entradas: number
-  saidas: number
+  balance: number
+}
+
+export interface InventoryItem {
+  id: string
+  name: string
+  sku: string
+  quantity: number
+  category: string
+  price: number
+  status: string
 }
 
 export function useSharePointData() {
   const [loading, setLoading] = useState(true)
-
-  const accounts = useMemo<AccountData[]>(() => {
-    return Array.from({ length: 45 }).map((_, i) => ({
-      id: `ACC-${1000 + i}`,
-      name: `Conta Corporativa ${i + 1}`,
-      type: ['Corrente', 'Poupança', 'Investimento', 'Crédito'][i % 4],
-      balance: 1000 + ((i * 2500) % 80000),
-      status: i % 7 === 0 ? 'Pendente' : i % 11 === 0 ? 'Cancelado' : 'Pago',
-      lastSync: new Date(Date.now() - i * 100000000)
-        .toISOString()
-        .split('T')[0],
-    }))
-  }, [])
-
-  const inventory = useMemo<InventoryData[]>(() => {
-    return Array.from({ length: 80 }).map((_, i) => ({
-      id: `INV-${5000 + i}`,
-      itemName: `Item ${i + 1} - ${['Pro', 'Max', 'Lite', 'Basic'][i % 4]}`,
-      sku: `SKU-${10000 + i * 7}`,
-      supplier: `Fornecedor ${['A', 'B', 'C', 'D'][i % 4]}`,
-      category: ['Eletrônicos', 'Móveis', 'Papelaria', 'Software'][i % 4],
-      quantity: i % 15 === 0 ? 0 : (i * 13) % 150,
-      unitPrice: 10 + ((i * 5) % 300),
-    }))
-  }, [])
-
-  const accountHistory = useMemo<AccountHistoryData[]>(() => {
-    return Array.from({ length: 12 }).map((_, i) => {
-      const d = new Date(2023, i, 15)
-      return {
-        date: d.toISOString().split('T')[0],
-        entradas: 200000 + i * 15000 + (i % 3 === 0 ? -5000 : 10000),
-        saidas: 150000 + i * 10000 + (i % 2 === 0 ? 5000 : -2000),
-      }
-    })
-  }, [])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [accountHistory, setAccountHistory] = useState<AccountHistory[]>([])
+  const [inventory, setInventory] = useState<InventoryItem[]>([])
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500)
+    // Using mock data to prevent 'fetch failed' errors from actual endpoints
+    const timer = setTimeout(() => {
+      setAccounts([
+        {
+          id: '1',
+          name: 'Conta Principal',
+          type: 'Corrente',
+          balance: 150000,
+          status: 'Ativa',
+        },
+        {
+          id: '2',
+          name: 'Fundo de Reserva',
+          type: 'Poupança',
+          balance: 350000,
+          status: 'Ativa',
+        },
+        {
+          id: '3',
+          name: 'Investimentos',
+          type: 'CDB',
+          balance: 500000,
+          status: 'Ativa',
+        },
+      ])
+
+      setAccountHistory([
+        { date: 'Jan', balance: 800000 },
+        { date: 'Fev', balance: 850000 },
+        { date: 'Mar', balance: 900000 },
+        { date: 'Abr', balance: 950000 },
+        { date: 'Mai', balance: 1000000 },
+      ])
+
+      setInventory([
+        {
+          id: '1',
+          name: 'Luminária de Teto',
+          sku: 'LUM-001',
+          quantity: 150,
+          category: 'Luminárias',
+          price: 299.9,
+          status: 'Em Estoque',
+        },
+        {
+          id: '2',
+          name: 'Lâmpada LED 15W',
+          sku: 'LED-015',
+          quantity: 12,
+          category: 'Lâmpadas',
+          price: 25.0,
+          status: 'Baixo Estoque',
+        },
+        {
+          id: '3',
+          name: 'Cabo Elétrico 2.5mm',
+          sku: 'CAB-250',
+          quantity: 0,
+          category: 'Acessórios',
+          price: 150.0,
+          status: 'Sem Estoque',
+        },
+        {
+          id: '4',
+          name: 'Interruptor Inteligente',
+          sku: 'SMT-INT',
+          quantity: 45,
+          category: 'Automação',
+          price: 120.0,
+          status: 'Em Estoque',
+        },
+        {
+          id: '5',
+          name: 'Fita LED RGB 5m',
+          sku: 'LED-RGB5',
+          quantity: 8,
+          category: 'Iluminação Decorativa',
+          price: 85.0,
+          status: 'Baixo Estoque',
+        },
+      ])
+
+      setLoading(false)
+    }, 500)
+
     return () => clearTimeout(timer)
   }, [])
 
-  return { accounts, inventory, accountHistory, loading }
+  return { accounts, accountHistory, inventory, loading }
 }
