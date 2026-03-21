@@ -4,7 +4,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { cashFlowPie } from '@/lib/mock-data'
 
 const chartConfig = {
   receita: {
@@ -17,7 +16,11 @@ const chartConfig = {
   },
 }
 
-export function FlowPieChart() {
+interface FlowPieChartProps {
+  data: any[]
+}
+
+export function FlowPieChart({ data }: FlowPieChartProps) {
   return (
     <ChartContainer
       config={chartConfig}
@@ -25,7 +28,7 @@ export function FlowPieChart() {
     >
       <PieChart>
         <Pie
-          data={cashFlowPie}
+          data={data}
           cx="50%"
           cy="50%"
           labelLine={false}
@@ -42,7 +45,7 @@ export function FlowPieChart() {
                 textAnchor={x > cx ? 'start' : 'end'}
                 dominantBaseline="central"
                 fontSize="11"
-                className="font-medium"
+                className="font-medium transition-all duration-300"
               >
                 <tspan x={x} dy="-0.6em">{`${value} Mi`}</tspan>
                 <tspan
@@ -55,7 +58,7 @@ export function FlowPieChart() {
           outerRadius={85}
           dataKey="value"
         >
-          {cashFlowPie.map((entry, index) => (
+          {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.fill} />
           ))}
         </Pie>

@@ -4,7 +4,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { cashFlowDaily } from '@/lib/mock-data'
 
 const chartConfig = {
   receita: {
@@ -17,14 +16,18 @@ const chartConfig = {
   },
 }
 
-export function DailyChart() {
+interface DailyChartProps {
+  data: any[]
+}
+
+export function DailyChart({ data }: DailyChartProps) {
   return (
     <ChartContainer
       config={chartConfig}
       className="w-full h-full min-h-[250px] aspect-auto mt-4"
     >
       <BarChart
-        data={cashFlowDaily}
+        data={data}
         margin={{ top: 10, right: 30, left: 10, bottom: 20 }}
       >
         <CartesianGrid

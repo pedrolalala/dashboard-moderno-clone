@@ -4,7 +4,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { cashFlowAccumulated } from '@/lib/mock-data'
 
 const chartConfig = {
   value: {
@@ -13,14 +12,18 @@ const chartConfig = {
   },
 }
 
-export function AccumulatedChart() {
+interface AccumulatedChartProps {
+  data: any[]
+}
+
+export function AccumulatedChart({ data }: AccumulatedChartProps) {
   return (
     <ChartContainer
       config={chartConfig}
       className="w-full h-full min-h-[250px] aspect-auto mt-4"
     >
       <AreaChart
-        data={cashFlowAccumulated}
+        data={data}
         margin={{ top: 10, right: 30, left: 10, bottom: 20 }}
       >
         <CartesianGrid
