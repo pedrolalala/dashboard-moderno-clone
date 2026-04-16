@@ -8,6 +8,7 @@ import {
   Moon,
   Settings,
   LineChart,
+  Receipt,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,7 @@ import { Button } from '@/components/ui/button'
 const navItems = [
   { icon: LayoutDashboard, label: 'Visão Geral', path: '/' },
   { icon: LineChart, label: 'Fluxo de Caixa', path: '/cash-flow' },
+  { icon: Receipt, label: 'Contas a Pagar', path: '/contas-a-pagar' },
   { icon: Wallet, label: 'Contas', path: '/accounts' },
   { icon: Package, label: 'Estoque', path: '/inventory' },
   { icon: Settings, label: 'Configurações', path: '/settings' },

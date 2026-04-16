@@ -1,6 +1,4 @@
-/* Table Component primitives - A component that displays a table - from shadcn/ui (exposes Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption) */
 import * as React from 'react'
-
 import { cn } from '@/lib/utils'
 
 const Table = React.forwardRef<
@@ -37,21 +35,6 @@ const TableBody = React.forwardRef<
 ))
 TableBody.displayName = 'TableBody'
 
-const TableFooter = React.forwardRef<
-  HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <tfoot
-    ref={ref}
-    className={cn(
-      'border-t bg-muted/50 font-medium [&>tr]:last:border-b-0',
-      className,
-    )}
-    {...props}
-  />
-))
-TableFooter.displayName = 'TableFooter'
-
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
@@ -74,7 +57,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
+      'h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
       className,
     )}
     {...props}
@@ -94,25 +77,4 @@ const TableCell = React.forwardRef<
 ))
 TableCell.displayName = 'TableCell'
 
-const TableCaption = React.forwardRef<
-  HTMLTableCaptionElement,
-  React.HTMLAttributes<HTMLTableCaptionElement>
->(({ className, ...props }, ref) => (
-  <caption
-    ref={ref}
-    className={cn('mt-4 text-sm text-muted-foreground', className)}
-    {...props}
-  />
-))
-TableCaption.displayName = 'TableCaption'
-
-export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
-}
+export { Table, TableHeader, TableBody, TableRow, TableHead, TableCell }
