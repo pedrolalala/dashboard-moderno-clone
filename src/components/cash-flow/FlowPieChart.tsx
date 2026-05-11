@@ -47,7 +47,13 @@ export function FlowPieChart({ data }: FlowPieChartProps) {
                 fontSize="11"
                 className="font-medium transition-all duration-300"
               >
-                <tspan x={x} dy="-0.6em">{`${value} Mi`}</tspan>
+                <tspan x={x} dy="-0.6em">
+                  {new Intl.NumberFormat('pt-BR', {
+                    notation: 'compact',
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(value)}
+                </tspan>
                 <tspan
                   x={x}
                   dy="1.2em"

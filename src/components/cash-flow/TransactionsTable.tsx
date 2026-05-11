@@ -62,7 +62,11 @@ export function TransactionsTable({ data }: { data: Transaction[] }) {
                   tx.type === 'receita' ? 'text-blue-400' : 'text-red-400',
                 )}
               >
-                {tx.type === 'receita' ? '+' : '-'} {tx.value.toFixed(2)} Mi
+                {tx.type === 'receita' ? '+' : '-'}{' '}
+                {new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                }).format(tx.value)}
               </TableCell>
               <TableCell className="text-center py-3">
                 <span

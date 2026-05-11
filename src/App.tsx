@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ThemeProvider } from '@/components/theme-provider'
+import { AuthProvider } from '@/hooks/use-auth'
 import Layout from './components/Layout'
 import Index from './pages/Index'
 import Accounts from './pages/Accounts'
@@ -16,20 +17,22 @@ const App = () => (
     future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
   >
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/cash-flow" element={<CashFlow />} />
-            <Route path="/contas-a-pagar" element={<ContasAPagar />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="/inventory" element={<Inventory />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/cash-flow" element={<CashFlow />} />
+              <Route path="/contas-a-pagar" element={<ContasAPagar />} />
+              <Route path="/accounts" element={<Accounts />} />
+              <Route path="/inventory" element={<Inventory />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </BrowserRouter>
 )

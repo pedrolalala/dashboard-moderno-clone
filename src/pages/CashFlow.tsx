@@ -1,130 +1,205 @@
-import { useState, useMemo } from 'react'
-import { ArrowLeft, Building2 } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { ArrowLeft, Building2, Loader2 } from 'lucide-react'
 import { DateRange } from 'react-day-picker'
-import { format, subDays } from 'date-fns'
+import { format, subDays, parseISO } from 'date-fns'
 import { FiltersSidebar } from '@/components/cash-flow/FiltersSidebar'
 import { KpiCards } from '@/components/cash-flow/KpiCards'
 import { AccumulatedChart } from '@/components/cash-flow/AccumulatedChart'
 import { DailyChart } from '@/components/cash-flow/DailyChart'
 import { FlowPieChart } from '@/components/cash-flow/FlowPieChart'
 import { TransactionsTable } from '@/components/cash-flow/TransactionsTable'
-import {
-  cashFlowAccumulated,
-  cashFlowDaily,
-  cashFlowPie,
-} from '@/lib/mock-data'
+import { supabase } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/use-auth'
+
+const formatCurrencyCompact = (value: number) =>
+  new Intl.NumberFormat('pt-BR', {
+    notation: 'compact',
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
 
 export default function CashFlow() {
+  const { user } = useAuth()
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 30),
     to: new Date(),
   })
   const [company, setCompany] = useState('all')
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
-  const factor = useMemo(() => {
-    let f = 1
-    if (dateRange?.from && dateRange?.to) {
-      const diffDays = Math.ceil(
-        Math.abs(dateRange.to.getTime() - dateRange.from.getTime()) /
-          (1000 * 60 * 60 * 24),
-      )
-      f = Math.max(0.5, diffDays / 30)
+  useEffect(() => {
+    if (!user) return
+
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        let query = supabase
+          .from('v_cash_flow_lucenera' as any)
+          .select('*')
+          .eq('status_pago', 1)
+          .in('tipo', ['receita', 'despesa'])
+
+        if (dateRange?.from) {
+          query = query.gte(
+            'dt_pagamento',
+            format(dateRange.from, 'yyyy-MM-dd'),
+          )
+        }
+        if (dateRange?.to) {
+          query = query.lte('dt_pagamento', format(dateRange.to, 'yyyy-MM-dd'))
+        }
+
+        if (company !== 'all') {
+          query = query.ilike('empresa_nome', `%${company}%`)
+        }
+
+        const { data, error } = await query
+        if (error) throw error
+
+        setTransactions(data || [])
+      } catch (err) {
+        console.error('Error fetching cash flow data:', err)
+      } finally {
+        setIsLoading(false)
+      }
     }
-    if (company !== 'all') f *= 0.65
-    return f
-  }, [dateRange, company])
 
-  const dynamicKpis = useMemo(
-    () => [
-      {
-        title: 'a Receber',
-        value: `${(25.98 * factor).toFixed(2)} Mi`,
-        topText: '0,00%',
-        subtitle: '% ValorParcela vs Mês Anterior',
-      },
-      {
-        title: 'Soma de ValorPago',
-        value: `${(15.9 * factor).toFixed(2)} Mi`,
-        topText: '+0,01%',
-        subtitle: '% ValorParcela vs Mês Anterior',
-      },
-      {
-        title: 'Soma de Despesas',
-        value: `${(12.14 * factor).toFixed(2)} Mi`,
-        topText: '-0,79%',
-        subtitle: '% ValorParcela vs Mês Anterior',
-      },
-      {
-        title: 'Saldo',
-        value: `${(-2.76 * factor).toFixed(2)} Mi`,
-        topText: '0,00%',
-        subtitle: 'Saldo projetado no período selecionado',
-      },
-    ],
-    [factor],
-  )
+    fetchData()
+  }, [dateRange, company, user])
 
-  const dynamicAccumulated = useMemo(
-    () =>
-      cashFlowAccumulated.map((d) => ({
-        ...d,
-        value: Number((d.value * factor).toFixed(2)),
-      })),
-    [factor],
-  )
+  const { dailyData, totalReceita, totalDespesa } = useMemo(() => {
+    const map = new Map<
+      string,
+      { date: Date; receita: number; despesa: number }
+    >()
 
-  const dynamicDaily = useMemo(
-    () =>
-      cashFlowDaily.map((d) => ({
-        ...d,
-        receita: Number((d.receita * factor).toFixed(2)),
-        despesa: Number((d.despesa * factor).toFixed(2)),
-      })),
-    [factor],
-  )
+    transactions.forEach((tx) => {
+      if (!tx.dt_pagamento || !tx.vl_pago) return
+      const key = tx.dt_pagamento.substring(0, 10) // Extracts YYYY-MM-DD safely
+
+      if (!map.has(key)) {
+        map.set(key, { date: parseISO(key), receita: 0, despesa: 0 })
+      }
+
+      const current = map.get(key)!
+      const value = Number(tx.vl_pago)
+
+      if (tx.tipo === 'receita') {
+        current.receita += value
+      } else if (tx.tipo === 'despesa') {
+        current.despesa += value
+      }
+    })
+
+    const sorted = Array.from(map.values()).sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    )
+
+    let tr = 0
+    let td = 0
+
+    const daily = sorted.map((d) => {
+      tr += d.receita
+      td += d.despesa
+      return {
+        day: format(d.date, 'dd/MM'),
+        receita: Number(d.receita.toFixed(2)),
+        despesa: Number(d.despesa.toFixed(2)),
+      }
+    })
+
+    return { dailyData: daily, totalReceita: tr, totalDespesa: td }
+  }, [transactions])
+
+  const dynamicAccumulated = useMemo(() => {
+    let running = 0
+    return dailyData.map((d) => {
+      running += d.receita - d.despesa
+      return {
+        day: d.day,
+        value: Number(running.toFixed(2)),
+      }
+    })
+  }, [dailyData])
 
   const dynamicPie = useMemo(() => {
-    const totalReceita = dynamicDaily.reduce(
-      (acc, curr) => acc + curr.receita,
-      0,
-    )
-    const totalDespesa = dynamicDaily.reduce(
-      (acc, curr) => acc + curr.despesa,
-      0,
-    )
     const sum = totalReceita + totalDespesa
     return [
       {
         name: 'Despesas',
         value: Number(totalDespesa.toFixed(2)),
-        percent: totalDespesa / sum,
+        percent: sum > 0 ? totalDespesa / sum : 0,
         fill: '#b91c1c',
       },
       {
         name: 'Receita',
         value: Number(totalReceita.toFixed(2)),
-        percent: totalReceita / sum,
+        percent: sum > 0 ? totalReceita / sum : 0,
         fill: '#1d4ed8',
       },
     ]
-  }, [dynamicDaily])
+  }, [totalReceita, totalDespesa])
 
   const dynamicTransactions = useMemo(() => {
-    const numTransactions = Math.max(3, Math.floor(8 * factor))
-    return Array.from({ length: numTransactions }).map((_, i) => ({
-      id: `tx-${i}`,
-      date: format(subDays(dateRange?.to || new Date(), i * 2), 'dd/MM/yyyy'),
-      description: i % 2 === 0 ? 'Pagamento Fornecedor' : 'Recebimento Cliente',
-      category: i % 2 === 0 ? 'Operacional' : 'Vendas',
-      value: Number(((Math.random() * 5 + 1) * factor).toFixed(2)),
-      type: i % 2 === 0 ? ('despesa' as const) : ('receita' as const),
-      status: i === 0 ? 'Pendente' : 'Concluído',
-    }))
-  }, [factor, dateRange])
+    return transactions
+      .map((tx, i) => ({
+        id: tx.id || `tx-${i}`,
+        date: tx.dt_pagamento
+          ? format(parseISO(tx.dt_pagamento.substring(0, 10)), 'dd/MM/yyyy')
+          : '-',
+        description: tx.descricao || 'Sem descrição',
+        category: tx.categoria || 'Geral',
+        value: Number(tx.vl_pago) || 0,
+        type: tx.tipo as 'receita' | 'despesa',
+        status: tx.status_pago === 1 ? 'Concluído' : 'Pendente',
+      }))
+      .sort((a, b) => {
+        const da =
+          a.date !== '-'
+            ? new Date(a.date.split('/').reverse().join('-')).getTime()
+            : 0
+        const db =
+          b.date !== '-'
+            ? new Date(b.date.split('/').reverse().join('-')).getTime()
+            : 0
+        return db - da
+      })
+  }, [transactions])
 
-  const totalDespesaLabel = useMemo(() => {
-    return dynamicDaily.reduce((acc, curr) => acc + curr.despesa, 0).toFixed(2)
-  }, [dynamicDaily])
+  const dynamicKpis = useMemo(() => {
+    const saldo = totalReceita - totalDespesa
+    const total = totalReceita + totalDespesa
+
+    return [
+      {
+        title: 'Receitas Realizadas',
+        value: formatCurrencyCompact(totalReceita),
+        topText: 'ENTRADAS',
+        subtitle: 'Soma de recebimentos no período',
+      },
+      {
+        title: 'Despesas Realizadas',
+        value: formatCurrencyCompact(totalDespesa),
+        topText: 'SAÍDAS',
+        subtitle: 'Soma de pagamentos no período',
+      },
+      {
+        title: 'Saldo Líquido',
+        value: formatCurrencyCompact(saldo),
+        topText: 'RESULTADO',
+        subtitle: 'Receitas - Despesas',
+      },
+      {
+        title: 'Volume Movimentado',
+        value: formatCurrencyCompact(total),
+        topText: 'FLUXO TOTAL',
+        subtitle: 'Soma de todas as movimentações',
+      },
+    ]
+  }, [totalReceita, totalDespesa])
+
+  const totalDespesaLabel = formatCurrencyCompact(totalDespesa)
 
   return (
     <div className="flex flex-col h-full bg-[#1e242b] text-white max-w-[1600px] mx-auto overflow-hidden animate-fade-in">
@@ -156,7 +231,13 @@ export default function CashFlow() {
       <div className="flex flex-1 gap-8 min-h-0 px-2">
         <FiltersSidebar date={dateRange} setDate={setDateRange} />
 
-        <div className="flex-1 flex flex-col gap-8 overflow-y-auto custom-scrollbar pb-6 pr-4">
+        <div className="flex-1 flex flex-col gap-8 overflow-y-auto custom-scrollbar pb-6 pr-4 relative">
+          {isLoading && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#1e242b]/50 backdrop-blur-sm rounded-md">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+          )}
+
           <KpiCards data={dynamicKpis} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[320px] shrink-0">
@@ -184,13 +265,13 @@ export default function CashFlow() {
                 Receita e Despesas por Dia
               </h3>
               <div className="flex-1 min-h-0">
-                <DailyChart data={dynamicDaily} />
+                <DailyChart data={dailyData} />
               </div>
             </div>
             <div className="lg:col-span-1 flex flex-col justify-end pb-8 px-4">
               <div className="bg-[#3b424d] p-6 rounded-sm flex flex-col justify-center items-center h-28 shadow-md transition-all duration-300">
                 <div className="text-3xl font-bold text-white mb-1 tracking-tight">
-                  {totalDespesaLabel} Mi
+                  {totalDespesaLabel}
                 </div>
                 <div className="text-sm text-white/90">Despesa Total</div>
               </div>

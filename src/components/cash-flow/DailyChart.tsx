@@ -55,7 +55,9 @@ export function DailyChart({ data }: DailyChartProps) {
           tick={{ fill: '#888', fontSize: 11 }}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(val) => `${val} Mi`}
+          tickFormatter={(val) =>
+            new Intl.NumberFormat('pt-BR', { notation: 'compact' }).format(val)
+          }
           label={{
             value: 'Receita e Despesas',
             angle: -90,
