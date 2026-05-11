@@ -14,7 +14,7 @@ export interface Transaction {
   description: string
   category: string
   value: number
-  type: 'receita' | 'despesa'
+  type: 'receita' | 'despesa' | 'distribuicao_lucro'
   status: string
 }
 
@@ -59,7 +59,11 @@ export function TransactionsTable({ data }: { data: Transaction[] }) {
               <TableCell
                 className={cn(
                   'text-right font-medium py-3',
-                  tx.type === 'receita' ? 'text-blue-400' : 'text-red-400',
+                  tx.type === 'receita'
+                    ? 'text-blue-400'
+                    : tx.type === 'distribuicao_lucro'
+                      ? 'text-amber-500'
+                      : 'text-red-400',
                 )}
               >
                 {tx.type === 'receita' ? '+' : '-'}{' '}

@@ -1,81 +1,60 @@
-import { Cell, Legend, Pie, PieChart } from 'recharts'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
+import { Cell, Pie, PieChart, Tooltip } from 'recharts'
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
 
 const chartConfig = {
-  receita: {
-    label: 'Receita',
-    color: '#1d4ed8',
-  },
-  despesa: {
+  Despesas: {
     label: 'Despesas',
-    color: '#b91c1c',
+    color: '#ef4444',
+  },
+  Receita: {
+    label: 'Receita',
+    color: '#3b82f6',
+  },
+  'Distrib. Lucro': {
+    label: 'Distribuição',
+    color: '#f59e0b',
   },
 }
 
 interface FlowPieChartProps {
   data: any[]
+  onCategoryClick?: (category: string) => void
 }
 
-export function FlowPieChart({ data }: FlowPieChartProps) {
+export function FlowPieChart({ data, onCategoryClick }: FlowPieChartProps) {
+  const handleClick = (entry: any) => {
+    if (!onCategoryClick) return
+    if (entry.name === 'Receita') onCategoryClick('receita')
+    if (entry.name === 'Despesas') onCategoryClick('despesa')
+    if (entry.name === 'Distrib. Lucro') onCategoryClick('distribuicao_lucro')
+  }
+
   return (
     <ChartContainer
       config={chartConfig}
-      className="w-full h-full min-h-[250px] aspect-auto flex items-center justify-center"
+      className="w-full h-full min-h-[250px] aspect-auto flex justify-center mt-2"
     >
       <PieChart>
         <Pie
           data={data}
           cx="50%"
           cy="50%"
-          labelLine={false}
-          label={({ cx, cy, midAngle, outerRadius, percent, value }) => {
-            const RADIAN = Math.PI / 180
-            const radius = outerRadius * 1.3
-            const x = cx + radius * Math.cos(-midAngle * RADIAN)
-            const y = cy + radius * Math.sin(-midAngle * RADIAN)
-            return (
-              <text
-                x={x}
-                y={y}
-                fill="white"
-                textAnchor={x > cx ? 'start' : 'end'}
-                dominantBaseline="central"
-                fontSize="11"
-                className="font-medium transition-all duration-300"
-              >
-                <tspan x={x} dy="-0.6em">
-                  {new Intl.NumberFormat('pt-BR', {
-                    notation: 'compact',
-                    style: 'currency',
-                    currency: 'BRL',
-                  }).format(value)}
-                </tspan>
-                <tspan
-                  x={x}
-                  dy="1.2em"
-                >{`(${(percent * 100).toFixed(2)}%)`}</tspan>
-              </text>
-            )
-          }}
-          outerRadius={85}
+          innerRadius={60}
+          outerRadius={80}
+          paddingAngle={2}
           dataKey="value"
+          onClick={handleClick}
+          className="cursor-pointer outline-none"
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.fill} />
+            <Cell
+              key={`cell-${index}`}
+              fill={entry.fill}
+              className="hover:opacity-80 transition-opacity duration-300 outline-none"
+            />
           ))}
         </Pie>
-        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-        <Legend
-          layout="vertical"
-          verticalAlign="middle"
-          align="right"
-          iconType="circle"
-          wrapperStyle={{ fontSize: '11px', color: '#fff' }}
-        />
+        <Tooltip content={<ChartTooltipContent />} />
       </PieChart>
     </ChartContainer>
   )

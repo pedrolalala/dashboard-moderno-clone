@@ -14,6 +14,10 @@ const chartConfig = {
     label: 'Despesas',
     color: '#ef4444',
   },
+  distribuicao: {
+    label: 'Distribuição',
+    color: '#f59e0b',
+  },
 }
 
 interface DailyChartProps {
@@ -77,6 +81,11 @@ export function DailyChart({ data }: DailyChartProps) {
         />
         <Bar dataKey="receita" fill="var(--color-receita)" barSize={6} />
         <Bar dataKey="despesa" fill="var(--color-despesa)" barSize={6} />
+        <Bar
+          dataKey="distribuicao"
+          fill="var(--color-distribuicao)"
+          barSize={6}
+        />
       </BarChart>
     </ChartContainer>
   )

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { ArrowLeft, Building2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { DateRange } from 'react-day-picker'
 import { format, subDays, parseISO } from 'date-fns'
 import { FiltersSidebar } from '@/components/cash-flow/FiltersSidebar'
@@ -24,9 +24,10 @@ export default function CashFlow() {
     from: subDays(new Date(), 30),
     to: new Date(),
   })
-  const [company, setCompany] = useState('all')
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -35,10 +36,10 @@ export default function CashFlow() {
       setIsLoading(true)
       try {
         let query = supabase
-          .from('v_cash_flow_lucenera' as any)
+          .from('v_cash_flow_lucenera')
           .select('*')
-          .eq('status_pago', 1)
-          .in('tipo', ['receita', 'despesa'])
+          .in('categoria_fluxo', ['receita', 'despesa', 'distribuicao_lucro'])
+          .not('vl_pago', 'is', null)
 
         if (dateRange?.from) {
           query = query.gte(
@@ -48,10 +49,6 @@ export default function CashFlow() {
         }
         if (dateRange?.to) {
           query = query.lte('dt_pagamento', format(dateRange.to, 'yyyy-MM-dd'))
-        }
-
-        if (company !== 'all') {
-          query = query.ilike('empresa_nome', `%${company}%`)
         }
 
         const { data, error } = await query
@@ -66,56 +63,72 @@ export default function CashFlow() {
     }
 
     fetchData()
-  }, [dateRange, company, user])
+  }, [dateRange, user])
 
-  const { dailyData, totalReceita, totalDespesa } = useMemo(() => {
-    const map = new Map<
-      string,
-      { date: Date; receita: number; despesa: number }
-    >()
+  const { dailyData, totalReceita, totalDespesa, totalDistribuicao } =
+    useMemo(() => {
+      const map = new Map<
+        string,
+        { date: Date; receita: number; despesa: number; distribuicao: number }
+      >()
 
-    transactions.forEach((tx) => {
-      if (!tx.dt_pagamento || !tx.vl_pago) return
-      const key = tx.dt_pagamento.substring(0, 10) // Extracts YYYY-MM-DD safely
+      transactions.forEach((tx) => {
+        if (!tx.dt_pagamento || !tx.vl_pago) return
+        const key = tx.dt_pagamento.substring(0, 10) // Extracts YYYY-MM-DD safely
 
-      if (!map.has(key)) {
-        map.set(key, { date: parseISO(key), receita: 0, despesa: 0 })
-      }
+        if (!map.has(key)) {
+          map.set(key, {
+            date: parseISO(key),
+            receita: 0,
+            despesa: 0,
+            distribuicao: 0,
+          })
+        }
 
-      const current = map.get(key)!
-      const value = Number(tx.vl_pago)
+        const current = map.get(key)!
+        const value = Number(tx.vl_pago)
 
-      if (tx.tipo === 'receita') {
-        current.receita += value
-      } else if (tx.tipo === 'despesa') {
-        current.despesa += value
-      }
-    })
+        if (tx.categoria_fluxo === 'receita') {
+          current.receita += value
+        } else if (tx.categoria_fluxo === 'despesa') {
+          current.despesa += value
+        } else if (tx.categoria_fluxo === 'distribuicao_lucro') {
+          current.distribuicao += value
+        }
+      })
 
-    const sorted = Array.from(map.values()).sort(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    )
+      const sorted = Array.from(map.values()).sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      )
 
-    let tr = 0
-    let td = 0
+      let tr = 0
+      let td = 0
+      let tdist = 0
 
-    const daily = sorted.map((d) => {
-      tr += d.receita
-      td += d.despesa
+      const daily = sorted.map((d) => {
+        tr += d.receita
+        td += d.despesa
+        tdist += d.distribuicao
+        return {
+          day: format(d.date, 'dd/MM'),
+          receita: Number(d.receita.toFixed(2)),
+          despesa: Number(d.despesa.toFixed(2)),
+          distribuicao: Number(d.distribuicao.toFixed(2)),
+        }
+      })
+
       return {
-        day: format(d.date, 'dd/MM'),
-        receita: Number(d.receita.toFixed(2)),
-        despesa: Number(d.despesa.toFixed(2)),
+        dailyData: daily,
+        totalReceita: tr,
+        totalDespesa: td,
+        totalDistribuicao: tdist,
       }
-    })
-
-    return { dailyData: daily, totalReceita: tr, totalDespesa: td }
-  }, [transactions])
+    }, [transactions])
 
   const dynamicAccumulated = useMemo(() => {
     let running = 0
     return dailyData.map((d) => {
-      running += d.receita - d.despesa
+      running += d.receita - d.despesa - d.distribuicao
       return {
         day: d.day,
         value: Number(running.toFixed(2)),
@@ -124,35 +137,63 @@ export default function CashFlow() {
   }, [dailyData])
 
   const dynamicPie = useMemo(() => {
-    const sum = totalReceita + totalDespesa
+    const sum = totalReceita + totalDespesa + totalDistribuicao
     return [
       {
         name: 'Despesas',
         value: Number(totalDespesa.toFixed(2)),
         percent: sum > 0 ? totalDespesa / sum : 0,
-        fill: '#b91c1c',
+        fill: '#ef4444',
       },
       {
         name: 'Receita',
         value: Number(totalReceita.toFixed(2)),
         percent: sum > 0 ? totalReceita / sum : 0,
-        fill: '#1d4ed8',
+        fill: '#3b82f6',
       },
-    ]
-  }, [totalReceita, totalDespesa])
+      {
+        name: 'Distrib. Lucro',
+        value: Number(totalDistribuicao.toFixed(2)),
+        percent: sum > 0 ? totalDistribuicao / sum : 0,
+        fill: '#f59e0b',
+      },
+    ].filter((d) => d.value > 0)
+  }, [totalReceita, totalDespesa, totalDistribuicao])
 
   const dynamicTransactions = useMemo(() => {
-    return transactions
+    let filtered = transactions
+
+    if (searchTerm) {
+      filtered = filtered.filter((tx) =>
+        tx.descricao?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    if (selectedCategory) {
+      filtered = filtered.filter(
+        (tx) => tx.categoria_fluxo === selectedCategory,
+      )
+    }
+
+    return filtered
       .map((tx, i) => ({
-        id: tx.id || `tx-${i}`,
+        id: `tx-${i}`,
         date: tx.dt_pagamento
           ? format(parseISO(tx.dt_pagamento.substring(0, 10)), 'dd/MM/yyyy')
           : '-',
         description: tx.descricao || 'Sem descrição',
-        category: tx.categoria || 'Geral',
+        category:
+          tx.categoria_fluxo === 'distribuicao_lucro'
+            ? 'Distribuição de Lucro'
+            : tx.categoria_fluxo === 'receita'
+              ? 'Receita'
+              : 'Despesa',
         value: Number(tx.vl_pago) || 0,
-        type: tx.tipo as 'receita' | 'despesa',
-        status: tx.status_pago === 1 ? 'Concluído' : 'Pendente',
+        type: tx.categoria_fluxo as
+          | 'receita'
+          | 'despesa'
+          | 'distribuicao_lucro',
+        status: 'Concluído',
       }))
       .sort((a, b) => {
         const da =
@@ -165,11 +206,11 @@ export default function CashFlow() {
             : 0
         return db - da
       })
-  }, [transactions])
+  }, [transactions, searchTerm, selectedCategory])
 
   const dynamicKpis = useMemo(() => {
-    const saldo = totalReceita - totalDespesa
-    const total = totalReceita + totalDespesa
+    const saldoOperacional = totalReceita - totalDespesa
+    const saldoFinal = saldoOperacional - totalDistribuicao
 
     return [
       {
@@ -179,25 +220,25 @@ export default function CashFlow() {
         subtitle: 'Soma de recebimentos no período',
       },
       {
-        title: 'Despesas Realizadas',
+        title: 'Despesas Operacionais',
         value: formatCurrencyCompact(totalDespesa),
         topText: 'SAÍDAS',
-        subtitle: 'Soma de pagamentos no período',
+        subtitle: 'Soma de despesas operacionais no período',
       },
       {
-        title: 'Saldo Líquido',
-        value: formatCurrencyCompact(saldo),
-        topText: 'RESULTADO',
-        subtitle: 'Receitas - Despesas',
+        title: 'Saldo Operacional',
+        value: formatCurrencyCompact(saldoOperacional),
+        topText: 'RESULTADO OPERACIONAL',
+        subtitle: 'Receitas - Despesas Operacionais',
       },
       {
-        title: 'Volume Movimentado',
-        value: formatCurrencyCompact(total),
-        topText: 'FLUXO TOTAL',
-        subtitle: 'Soma de todas as movimentações',
+        title: 'Saldo Final de Caixa',
+        value: formatCurrencyCompact(saldoFinal),
+        topText: 'RESULTADO LÍQUIDO',
+        subtitle: 'Saldo Operacional - Distribuição de Lucros',
       },
     ]
-  }, [totalReceita, totalDespesa])
+  }, [totalReceita, totalDespesa, totalDistribuicao])
 
   const totalDespesaLabel = formatCurrencyCompact(totalDespesa)
 
@@ -211,20 +252,6 @@ export default function CashFlow() {
           <h1 className="text-3xl font-bold tracking-wide text-white">
             Lucenera
           </h1>
-        </div>
-
-        <div className="flex items-center gap-2 bg-[#3b424d] px-3 py-1.5 rounded-md border border-white/10 shadow-sm">
-          <Building2 className="w-4 h-4 text-white/60" />
-          <select
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            className="bg-transparent text-[13px] font-medium text-white/90 border-none outline-none cursor-pointer focus:ring-0 [&>option]:bg-[#3b424d]"
-          >
-            <option value="all">Todas as Empresas</option>
-            <option value="lucenera">LUCE NERA</option>
-            <option value="foco">FOCO ILUMINACAO</option>
-            <option value="islight">ISLIGHT</option>
-          </select>
         </div>
       </div>
 
@@ -254,7 +281,12 @@ export default function CashFlow() {
                 Despesas e Receita
               </h3>
               <div className="flex-1 min-h-0 relative">
-                <FlowPieChart data={dynamicPie} />
+                <FlowPieChart
+                  data={dynamicPie}
+                  onCategoryClick={(cat) => {
+                    setSelectedCategory((prev) => (prev === cat ? null : cat))
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -279,9 +311,32 @@ export default function CashFlow() {
           </div>
 
           <div className="flex flex-col shrink-0 mt-2">
-            <h3 className="text-[15px] font-bold text-white mb-4 ml-2">
-              Lançamentos do Período
-            </h3>
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h3 className="text-[15px] font-bold text-white">
+                Lançamentos do Período
+              </h3>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedCategory || ''}
+                  onChange={(e) => setSelectedCategory(e.target.value || null)}
+                  className="bg-[#3b424d] text-[13px] text-white/90 border border-white/10 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Todas Categorias</option>
+                  <option value="receita">Receita</option>
+                  <option value="despesa">Despesa Operacional</option>
+                  <option value="distribuicao_lucro">
+                    Distribuição de Lucro
+                  </option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Filtrar por descrição..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-[#3b424d] text-[13px] text-white/90 border border-white/10 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 transition-colors w-64 placeholder:text-white/40"
+                />
+              </div>
+            </div>
             <TransactionsTable data={dynamicTransactions} />
           </div>
         </div>
