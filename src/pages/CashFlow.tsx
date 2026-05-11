@@ -43,12 +43,15 @@ export default function CashFlow() {
 
         if (dateRange?.from) {
           query = query.gte(
-            'dt_pagamento',
+            'data_pagamento',
             format(dateRange.from, 'yyyy-MM-dd'),
           )
         }
         if (dateRange?.to) {
-          query = query.lte('dt_pagamento', format(dateRange.to, 'yyyy-MM-dd'))
+          query = query.lte(
+            'data_pagamento',
+            format(dateRange.to, 'yyyy-MM-dd'),
+          )
         }
 
         const { data, error } = await query
@@ -73,8 +76,8 @@ export default function CashFlow() {
       >()
 
       transactions.forEach((tx) => {
-        if (!tx.dt_pagamento || !tx.vl_pago) return
-        const key = tx.dt_pagamento.substring(0, 10) // Extracts YYYY-MM-DD safely
+        if (!tx.data_pagamento || !tx.vl_pago) return
+        const key = tx.data_pagamento.substring(0, 10) // Extracts YYYY-MM-DD safely
 
         if (!map.has(key)) {
           map.set(key, {
@@ -178,8 +181,8 @@ export default function CashFlow() {
     return filtered
       .map((tx, i) => ({
         id: `tx-${i}`,
-        date: tx.dt_pagamento
-          ? format(parseISO(tx.dt_pagamento.substring(0, 10)), 'dd/MM/yyyy')
+        date: tx.data_pagamento
+          ? format(parseISO(tx.data_pagamento.substring(0, 10)), 'dd/MM/yyyy')
           : '-',
         description: tx.descricao || 'Sem descrição',
         category:
