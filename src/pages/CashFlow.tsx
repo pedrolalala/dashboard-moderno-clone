@@ -40,6 +40,7 @@ export default function CashFlow() {
           .select('*')
           .in('categoria_fluxo', ['receita', 'despesa', 'distribuicao_lucro'])
           .not('vl_pago', 'is', null)
+          .not('data_pagamento', 'is', null)
 
         if (dateRange?.from) {
           query = query.gte(
@@ -120,11 +121,14 @@ export default function CashFlow() {
         }
       })
 
+      const saldoFinal = tr - td - tdist
+
       return {
         dailyData: daily,
         totalReceita: tr,
         totalDespesa: td,
         totalDistribuicao: tdist,
+        saldoFinal,
       }
     }, [transactions])
 
@@ -212,9 +216,6 @@ export default function CashFlow() {
   }, [transactions, searchTerm, selectedCategory])
 
   const dynamicKpis = useMemo(() => {
-    const saldoOperacional = totalReceita - totalDespesa
-    const saldoFinal = saldoOperacional - totalDistribuicao
-
     return [
       {
         title: 'Receitas Realizadas',
@@ -229,21 +230,19 @@ export default function CashFlow() {
         subtitle: 'Soma de despesas operacionais no período',
       },
       {
-        title: 'Saldo Operacional',
-        value: formatCurrencyCompact(saldoOperacional),
-        topText: 'RESULTADO OPERACIONAL',
-        subtitle: 'Receitas - Despesas Operacionais',
+        title: 'Distribuição de Lucro',
+        value: formatCurrencyCompact(totalDistribuicao),
+        topText: 'SÓCIOS',
+        subtitle: 'Soma de retiradas no período',
       },
       {
         title: 'Saldo Final de Caixa',
         value: formatCurrencyCompact(saldoFinal),
         topText: 'RESULTADO LÍQUIDO',
-        subtitle: 'Saldo Operacional - Distribuição de Lucros',
+        subtitle: 'Entradas - Saídas - Distribuição',
       },
     ]
   }, [totalReceita, totalDespesa, totalDistribuicao])
-
-  const totalDespesaLabel = formatCurrencyCompact(totalDespesa)
 
   return (
     <div className="flex flex-col h-full bg-[#1e242b] text-white max-w-[1600px] mx-auto overflow-hidden animate-fade-in">
@@ -273,7 +272,7 @@ export default function CashFlow() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[320px] shrink-0">
             <div className="lg:col-span-2 flex flex-col">
               <h3 className="text-[13px] font-bold text-white mb-2 ml-2">
-                Saldo Acumulado Previsto (dia) por Dia
+                Saldo Acumulado Realizado por Dia
               </h3>
               <div className="flex-1 min-h-0">
                 <AccumulatedChart data={dynamicAccumulated} />
@@ -306,9 +305,11 @@ export default function CashFlow() {
             <div className="lg:col-span-1 flex flex-col justify-end pb-8 px-4">
               <div className="bg-[#3b424d] p-6 rounded-sm flex flex-col justify-center items-center h-28 shadow-md transition-all duration-300">
                 <div className="text-3xl font-bold text-white mb-1 tracking-tight">
-                  {totalDespesaLabel}
+                  {formatCurrencyCompact(saldoFinal)}
                 </div>
-                <div className="text-sm text-white/90">Despesa Total</div>
+                <div className="text-sm text-white/90">
+                  Saldo Final do Período
+                </div>
               </div>
             </div>
           </div>

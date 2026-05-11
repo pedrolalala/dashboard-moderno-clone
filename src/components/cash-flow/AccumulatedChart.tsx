@@ -55,7 +55,7 @@ export function AccumulatedChart({ data }: AccumulatedChartProps) {
             new Intl.NumberFormat('pt-BR', { notation: 'compact' }).format(val)
           }
           label={{
-            value: 'Saldo Acumulado Previsto (dia)',
+            value: 'Saldo Acumulado Realizado',
             angle: -90,
             position: 'insideLeft',
             fill: '#888',
